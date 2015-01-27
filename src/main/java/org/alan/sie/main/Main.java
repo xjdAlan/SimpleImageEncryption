@@ -16,7 +16,7 @@ public class Main {
         logger.info("Spring启动成功...");
 
         EncryptionService encryptionService = appContext.getBean(EncryptionService.class);
-        encryptionService.test();
+        encryptionService.start();
         logger.info("所有任务已完成");
     }
 }

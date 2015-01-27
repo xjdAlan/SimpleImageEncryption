@@ -2,9 +2,12 @@ package org.alan.sie.main;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
 
+import org.alan.libs.util.HexConversionUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -24,6 +27,7 @@ public class EncryptionService {
     
     private static Logger logger = LogManager.getLogger(EncryptionService.class);
     
+    private String encoding = "utf-8";
     private int type;//0加密 1解密
     private Map<Integer, Integer> randLocAndNum;//随机字串位置和个数
     private List<String> fileType;//支持的文件类型（其他文件忽略）
@@ -74,12 +78,24 @@ public class EncryptionService {
         this.ifOldName = ifOldName;
     }
     
+    public static Logger getLogger() {
+        return logger;
+    }
+    public static void setLogger(Logger logger) {
+        EncryptionService.logger = logger;
+    }
+    public String getEncoding() {
+        return encoding;
+    }
+    public void setEncoding(String encoding) {
+        this.encoding = encoding;
+    }
     public void start() {
-        if (type == 0) {
-            iteratorFileEnc(new File(oldFilePath));
-        } else {
-            iteratorFileDec(new File(targetFilePath));
-        }
+        File file = new File(oldFilePath);
+        if (type == 0) 
+            iteratorFileEnc(file);
+        else 
+            iteratorFileDec(file);
     }
     
     /**
@@ -99,8 +115,11 @@ public class EncryptionService {
         });
         
         for (File f : files) {
-            if (file.isDirectory()) iteratorFileEnc(f); 
-            enc(file);
+            if (f.isDirectory()) {
+                iteratorFileEnc(f);
+                continue;
+            }
+            enc(f);
         }
     }
     
@@ -111,9 +130,30 @@ public class EncryptionService {
      * 2015-1-26 下午9:56:35
      */
     private void enc(File file) {
-        // TODO Auto-generated method stub
-        
+        try {
+            StringBuffer encStr = new StringBuffer();
+            String fileName = file.getName();
+            String fileType = fileName.substring(fileName.lastIndexOf(".") + 1);
+            FileTypeEnum fte = FileTypeEnum.getByName(fileType);
+            if (fte == null) throw new RuntimeException("该文件类型不被支持：" + fileType);
+            //文件类型
+            encStr.append(HexConversionUtil.decimal2ThirtyTwo(fte.getValue()));
+            //文件名称
+            encStr.append(HexConversionUtil.byte2ThirtyTwo(fileName.getBytes(encoding))).append(fileNameSplitChar);
+            if (ifOldName == 0) 
+                fileName = HexConversionUtil.toMd5For16(fileName, encoding);
+            byte[] fileByte = FileInOutUtil.readFile(file);
+            //文件内容转32进制
+            String content = HexConversionUtil.byte2ThirtyTwo(fileByte);
+            //rot16
+            content = HexConversionUtil.rot16(content);
+            //插入随机字符
+        } catch (IOException | NoSuchAlgorithmException e) {
+            logger.error("文件加密出现异常{}", e);
+        }
     }
+    
+    
     
     /**
      * 遍历待解密文件
@@ -132,7 +172,7 @@ public class EncryptionService {
         });
         
         for (File f : files) {
-            dec(file);
+            dec(f);
         }
     }
     

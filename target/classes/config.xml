@@ -17,7 +17,48 @@
     
     <bean id="encryptionService" class="org.alan.sie.main.EncryptionService">
         <property name="type">
-            <value>1</value>
+            <value>0</value>
+        </property>
+        <property name="ifOldName">
+            <value>0</value>
+        </property>
+        <property name="fileNameSplitChar">
+            <value>@</value>
+        </property>
+        <property name="fileType">
+            <list>
+                <value>txt</value>
+                <value>doc</value>
+                <value>docx</value>
+                <value>xls</value>
+                <value>xlsx</value>
+                <value>jpg</value>
+                <value>png</value>
+                <value>gif</value>
+                <value>bmp</value>
+            </list>
+        </property>
+        <property name="randLocAndNum">
+            <map>
+                <entry>
+                    <key><value>5</value></key>
+                    <value>9</value>
+                </entry>
+                <entry>
+                    <key><value>55</value></key>
+                    <value>19</value>
+                </entry>
+                <entry>
+                    <key><value>355</value></key>
+                    <value>29</value>
+                </entry>
+            </map>
+        </property>
+        <property name="oldFilePath">
+            <value>D:\enctest\old</value>
+        </property>
+        <property name="targetFilePath">
+            <value>D:\enctest\new</value>
         </property>
     </bean>
     
