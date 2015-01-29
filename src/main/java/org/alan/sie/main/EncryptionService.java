@@ -3,11 +3,16 @@ package org.alan.sie.main;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
 import org.alan.libs.util.HexConversionUtil;
+import org.alan.libs.util.StringUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -138,19 +143,51 @@ public class EncryptionService {
             if (fte == null) throw new RuntimeException("该文件类型不被支持：" + fileType);
             //文件类型
             encStr.append(HexConversionUtil.decimal2ThirtyTwo(fte.getValue()));
+            fileName = fileName.substring(0, fileName.lastIndexOf("."));
             //文件名称
             encStr.append(HexConversionUtil.byte2ThirtyTwo(fileName.getBytes(encoding))).append(fileNameSplitChar);
             if (ifOldName == 0) 
-                fileName = HexConversionUtil.toMd5For16(fileName, encoding);
+                fileName = StringUtil.repWinFileSpeChar(HexConversionUtil.toMd5For16(fileName, encoding), "_");
+            fileName += ".txt";
             byte[] fileByte = FileInOutUtil.readFile(file);
             //文件内容转32进制
             String content = HexConversionUtil.byte2ThirtyTwo(fileByte);
             //rot16
             content = HexConversionUtil.rot16(content);
+            StringBuffer contentSb = new StringBuffer(content);
             //插入随机字符
+            List<Integer> list = new ArrayList<Integer>(randLocAndNum.keySet());
+            Collections.sort(list, new Comparator<Integer>() {
+                @Override
+                public int compare(Integer o1, Integer o2) {
+                    return o2 - o1;
+                }
+            });
+            String randStr;
+            for (Integer key : list) {
+                randStr = HexConversionUtil.randThirtyTwoStr(randLocAndNum.get(key));
+                contentSb.insert(key, randStr);
+            }
+            contentSb.insert(0, encStr);
+            
+            write2File(contentSb.toString(), fileName);
         } catch (IOException | NoSuchAlgorithmException e) {
             logger.error("文件加密出现异常{}", e);
         }
+    }
+    
+    /**
+     * 将加密后的文件内容写入文件
+     * Alan
+     * @param content
+     * @param fileName
+     * 2015-1-29 下午9:05:37
+     * @throws IOException 
+     * @throws UnsupportedEncodingException 
+     */
+    private void write2File(String content, String fileName) throws UnsupportedEncodingException, IOException {
+        File file = new File(String.format("%s/%s", targetFilePath, fileName));
+        FileInOutUtil.writeFile(file, content.getBytes(encoding));
     }
     
     
@@ -181,10 +218,55 @@ public class EncryptionService {
      * Alan
      * @param file
      * 2015-1-26 下午9:56:25
+     * @throws IOException 
+     * @throws NoSuchAlgorithmException 
      */
     private void dec(File file) {
-        // TODO Auto-generated method stub
-        
+        try {
+            String content = FileInOutUtil.readFileStr(file);
+            //文件类型
+            int ft = (int) HexConversionUtil.thirtyTwo2Decimal(content.substring(0, 1));
+            String fileType = FileTypeEnum.getByValue(ft).getName();
+            
+            int fileNameSplitLoc = content.indexOf(fileNameSplitChar);
+            //文件名称
+            String fileName = new String(HexConversionUtil.thirtyTwo2Byte(content.substring(1, fileNameSplitLoc)));
+            if (ifOldName == 0) 
+                fileName = StringUtil.repWinFileSpeChar(HexConversionUtil.toMd5For16(fileName, encoding), "_");
+            fileName += "." + fileType;
+            
+            //文件内容
+            content = content.substring(fileNameSplitLoc + 1);
+            
+            StringBuffer contentSb = new StringBuffer(content);
+            List<Integer> list = new ArrayList<Integer>(randLocAndNum.keySet());
+            Collections.sort(list, new Comparator<Integer>() {
+                @Override
+                public int compare(Integer o1, Integer o2) {
+                    return o2 - o1;
+                }
+            });
+            for (Integer key : list) {
+                contentSb.delete(key, key + randLocAndNum.get(key));
+            }
+            
+            write2File(HexConversionUtil.thirtyTwo2Byte(contentSb.toString()), fileName);
+        } catch (IOException | NoSuchAlgorithmException e) {
+            logger.error("文件解密出现异常{}", e);
+        }
+    }
+    
+    /**
+     * 将解密后的内容写入文件
+     * Alan
+     * @param bytes
+     * @param fileName
+     * 2015-1-29 下午10:08:21
+     * @throws IOException 
+     */
+    private void write2File(byte[] bytes, String fileName) throws IOException {
+        File file = new File(String.format("%s/%s", targetFilePath, fileName));
+        FileInOutUtil.writeFile(file, bytes);
     }
     
     
