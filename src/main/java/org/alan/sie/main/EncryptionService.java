@@ -165,6 +165,10 @@ public class EncryptionService {
             });
             String randStr;
             for (Integer key : list) {
+                if (key > contentSb.length()){ 
+                    logger.warn("加密文件{}时随机字串的位置过大", fileName);
+                    continue;
+                }
                 randStr = HexConversionUtil.randThirtyTwoStr(randLocAndNum.get(key));
                 contentSb.insert(key, randStr);
             }
@@ -187,7 +191,7 @@ public class EncryptionService {
      */
     private void write2File(String content, String fileName) throws UnsupportedEncodingException, IOException {
         File file = new File(String.format("%s/%s", targetFilePath, fileName));
-        FileInOutUtil.writeFile(file, content.getBytes(encoding));
+        FileInOutUtil.writeFile(file, content.getBytes(encoding), false);
     }
     
     
@@ -243,14 +247,18 @@ public class EncryptionService {
             Collections.sort(list, new Comparator<Integer>() {
                 @Override
                 public int compare(Integer o1, Integer o2) {
-                    return o2 - o1;
+                    return o1 - o2;
                 }
             });
             for (Integer key : list) {
+                if (key > contentSb.length()) {
+                    logger.warn("解密文件{}时随机字串的位置过大", fileName);
+                    continue;
+                }
                 contentSb.delete(key, key + randLocAndNum.get(key));
             }
             
-            write2File(HexConversionUtil.thirtyTwo2Byte(contentSb.toString()), fileName);
+            write2File(HexConversionUtil.thirtyTwo2Byte(HexConversionUtil.rot16(contentSb.toString())), fileName);
         } catch (IOException | NoSuchAlgorithmException e) {
             logger.error("文件解密出现异常{}", e);
         }

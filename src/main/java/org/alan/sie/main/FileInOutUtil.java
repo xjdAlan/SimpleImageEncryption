@@ -46,6 +46,13 @@ public class FileInOutUtil {
         out.write(bytes);
         out.close();
     }
+    public static void writeFile(File file, byte[] bytes, boolean canWrite) throws IOException {
+        OutputStream out = new BufferedOutputStream(new FileOutputStream(file));
+        out.write(bytes);
+        out.close();
+        if (!canWrite) 
+            file.setWritable(false);
+    }
 
     /**
      * 读取文件内容（用于解密时）

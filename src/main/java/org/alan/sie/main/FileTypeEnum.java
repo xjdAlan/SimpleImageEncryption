@@ -10,6 +10,8 @@ public enum FileTypeEnum {
     PNG(7, "png"),
     GIF(8, "gif"),
     BMP(9, "bmp"),
+    RAR(10, "rar"),
+    ZIP(11, "zip");
     ;
     
     private int value;

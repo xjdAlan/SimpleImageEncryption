@@ -38,6 +38,8 @@
                 <value>png</value>
                 <value>gif</value>
                 <value>bmp</value>
+                <value>rar</value>
+                <value>zip</value>
             </list>
         </property>
         <property name="randLocAndNum">
@@ -51,7 +53,7 @@
                     <value>19</value>
                 </entry>
                 <entry>
-                    <key><value>355</value></key>
+                    <key><value>50000</value></key>
                     <value>29</value>
                 </entry>
             </map>
@@ -62,7 +64,7 @@
         <property name="targetFilePath">
             <value>D:\enctest\new</value>
         </property>
-         -->
+           -->
         
         
         <!-- 解密 -->
@@ -87,6 +89,8 @@
                 <value>png</value>
                 <value>gif</value>
                 <value>bmp</value>
+                <value>rar</value>
+                <value>zip</value>
             </list>
         </property>
         <property name="randLocAndNum">
@@ -100,7 +104,7 @@
                     <value>19</value>
                 </entry>
                 <entry>
-                    <key><value>355</value></key>
+                    <key><value>50000</value></key>
                     <value>29</value>
                 </entry>
             </map>
@@ -111,7 +115,7 @@
         <property name="targetFilePath">
             <value>D:\enctest\dec</value>
         </property>
-        
+         
     </bean>
     
 </beans>
