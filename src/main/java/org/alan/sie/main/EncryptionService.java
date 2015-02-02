@@ -234,7 +234,7 @@ public class EncryptionService {
             
             int fileNameSplitLoc = content.indexOf(fileNameSplitChar);
             //文件名称
-            String fileName = new String(HexConversionUtil.thirtyTwo2Byte(content.substring(1, fileNameSplitLoc)));
+            String fileName = new String(HexConversionUtil.thirtyTwo2Byte(content.substring(1, fileNameSplitLoc)), encoding);
             if (ifOldName == 0) 
                 fileName = StringUtil.repWinFileSpeChar(HexConversionUtil.toMd5For16(fileName, encoding), "_");
             fileName += "." + fileType;
